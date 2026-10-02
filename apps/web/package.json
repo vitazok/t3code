@@ -22,6 +22,7 @@
     "@dnd-kit/utilities": "^3.2.2",
     "@effect/atom-react": "catalog:",
     "@formkit/auto-animate": "^0.9.0",
+    "@joblab/assessment-ui": "workspace:*",
     "@legendapp/list": "catalog:",
     "@noble/hashes": "catalog:",
     "@pierre/diffs": "catalog:",

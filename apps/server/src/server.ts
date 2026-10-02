@@ -1,3 +1,4 @@
+import * as JoblabHttp from "./joblab/http.ts";
 import type { RelayManagedEndpointRuntimeConfig } from "@t3tools/contracts/relay";
 import * as Clock from "effect/Clock";
 import * as Random from "effect/Random";
@@ -622,6 +623,7 @@ const commandReadinessLayer = HttpRouter.middleware(
 );
 
 const makeRoutesLayer = Layer.mergeAll(
+  JoblabHttp.layer,
   Layer.mergeAll(
     HttpApiBuilder.layer(EnvironmentHttpApi).pipe(
       Layer.provide(authHttpApiLayer),

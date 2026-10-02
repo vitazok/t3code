@@ -1,4 +1,8 @@
+import { AssessmentPanel } from "@joblab/assessment-ui";
+import "@joblab/assessment-ui/index.css";
+import { useRightPanelStore } from "../rightPanelStore";
 import { scopedThreadKey } from "@t3tools/client-runtime/environment";
+import { ThreadId } from "@t3tools/contracts";
 import type { ScopedThreadRef } from "@t3tools/contracts";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
@@ -191,7 +195,27 @@ export function ThreadRouteView({ target }: { target: ThreadRouteTarget }) {
 
   return (
     <SidebarInset className="h-svh min-h-0 overflow-hidden overscroll-y-none md:h-dvh">
-      {view}
+      <div style={{ display: "flex", height: "100%", minHeight: 0 }}>
+        <div style={{ flex: 1, minWidth: 0, height: "100%", display: "flex" }}>{view}</div>
+        <AssessmentPanel
+          threadId={serverThreadRef?.threadId}
+          onBound={(threadId) => {
+            const environmentId = serverThreadRef?.environmentId ?? draftSession?.environmentId;
+            if (
+              environmentId &&
+              threadId !== serverThreadRef?.threadId &&
+              window.location.pathname === "/"
+            )
+              void navigate({
+                to: "/$environmentId/$threadId",
+                params: { environmentId, threadId: ThreadId.make(threadId) },
+              });
+          }}
+          onOpenFile={(path) => {
+            if (serverThreadRef) useRightPanelStore.getState().openFile(serverThreadRef, path);
+          }}
+        />
+      </div>
     </SidebarInset>
   );
 }

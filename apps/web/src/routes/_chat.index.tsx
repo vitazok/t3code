@@ -1,3 +1,5 @@
+import { ThreadId } from "@t3tools/contracts";
+import { useNavigate } from "@tanstack/react-router";
 import { RefreshIcon } from "~/components/ui/refresh-icon";
 import { scopeProjectRef } from "@t3tools/client-runtime/environment";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -41,6 +43,27 @@ function ChatIndexRouteView() {
  */
 function IndexDraftLanding() {
   const projects = useProjects();
+  const navigate = useNavigate();
+  const [assessment, setAssessment] = useState<
+    { projectId: string; threadId: string } | null | undefined
+  >(undefined);
+  useEffect(() => {
+    void fetch("/api/joblab/binding")
+      .then(async (r) => setAssessment(r.ok ? await r.json() : null))
+      .catch(() => setAssessment(null));
+  }, []);
+  useEffect(() => {
+    const project = assessment && projects.find((p) => p.id === assessment.projectId);
+    if (project && assessment)
+      void navigate({
+        to: "/$environmentId/$threadId",
+        params: {
+          environmentId: project.environmentId,
+          threadId: ThreadId.make(assessment.threadId),
+        },
+        replace: true,
+      });
+  }, [assessment, projects, navigate]);
   const threads = useThreadShells();
   const bootstrapped = useAllEnvironmentShellsBootstrapped();
   const handleNewThread = useNewThreadHandler();
@@ -56,7 +79,7 @@ function IndexDraftLanding() {
   );
 
   useEffect(() => {
-    if (mostRecentProject === null || startingRef.current) {
+    if (assessment !== null || mostRecentProject === null || startingRef.current) {
       return;
     }
     startingRef.current = true;
@@ -66,7 +89,7 @@ function IndexDraftLanding() {
       startingRef.current = false;
       setStartState((state) => ({ ...state, failed: true }));
     });
-  }, [handleNewThread, mostRecentProject, startState.retryRequest]);
+  }, [assessment, handleNewThread, mostRecentProject, startState.retryRequest]);
 
   if (!bootstrapped) {
     return null;
